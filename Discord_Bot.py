@@ -1,10 +1,16 @@
 from flask import Flask, request, abort
 import requests
 import json
-import time
 from urllib3.exceptions import NameResolutionError
+import psycopg
 
+#SQL Config
 
+conn = psycopg.connect(host = "localhost", dbname = "postgres", password = "CodemachinePG", port = 51432)
+
+cursor = conn.cursor()
+
+#Begin code
 
 app = Flask(__name__)
 discord_webhook = "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp"
