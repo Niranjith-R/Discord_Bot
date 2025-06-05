@@ -6,7 +6,7 @@ import psycopg
 
 #SQL Config
 
-conn = psycopg.connect(host = "localhost", dbname = "postgres", password = "CodemachinePG", port = 51432)
+conn = psycopg.connect(host = "localhost", dbname = "postgres", password = "CodemachinePG", port = 51432, user = "postgres")
 
 cursor = conn.cursor()
 
@@ -14,6 +14,19 @@ cursor = conn.cursor()
 
 app = Flask(__name__)
 discord_webhook = "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp"
+dev_webhool = "https://discordapp.com/api/webhooks/1380238568231796857/kGLi-X7jwu7ScSKXNMxry2M8LR3zk0qP3y0HhEtphUY2cJdorxwL1MBffGyBoaBwDnia"
+
+def create_db():
+    try:
+        cursor.execute("""CREATE TABLE IF NOT EXISTS SERVER_LOG (
+                    id INT PRIMARY KEY, message VARCHAR(500),is_uploaded BOOLEAN)""")
+        print("Database created successfully")
+    except:
+        print("Error")
+
+
+def store_to_db(msg, status):
+    pass
 
 
 def send_to_discord(msg, u_name):
@@ -58,4 +71,5 @@ def truenas():
 
 
 
-app.run(host="0.0.0.0", port= 5000)
+#app.run(host="0.0.0.0", port= 5000)
+create_db()
