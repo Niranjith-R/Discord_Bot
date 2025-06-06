@@ -13,39 +13,39 @@ cursor = conn.cursor()
 #Begin code
 
 app = Flask(__name__)
-discord_webhook = "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp"
-dev_webhool = "https://discordapp.com/api/webhooks/1380238568231796857/kGLi-X7jwu7ScSKXNMxry2M8LR3zk0qP3y0HhEtphUY2cJdorxwL1MBffGyBoaBwDnia"
+
+servers = {"main" : "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp", "dev_channel" : "https://discordapp.com/api/webhooks/1380238568231796857/kGLi-X7jwu7ScSKXNMxry2M8LR3zk0qP3y0HhEtphUY2cJdorxwL1MBffGyBoaBwDnia"}
 
 def create_db():
     try:
         cursor.execute("""CREATE TABLE IF NOT EXISTS SERVER_LOG (
-                    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, message VARCHAR(500),is_uploaded BOOLEAN);""")
+                    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, message VARCHAR(500), application_name VARCHAR(25), is_uploaded BOOLEAN);""")
         print("Database created successfully")
         conn.commit()
-    except:
-        print("Error")
+    except Exception as e :
+        print("Error", e)
 
 
-def store_to_db(msg, status):
-    cursor.execute("""INSERT INTO SERVER_LOG (message,is_uploaded) VALUES(
-                   %s, %s);
-    """, (msg, status))
+def store_to_db(msg, u_name, status):
+    cursor.execute("""INSERT INTO SERVER_LOG (message,application_name, is_uploaded) VALUES(
+                   %s, %s, %s);
+    """, (msg, u_name,status))
     conn.commit()
-    print("Successfully stored in Database")
+    print("Successfully stored in Database\n")
 
 
-def send_to_discord(msg, u_name):
-    try:
+def send_to_discord(msg, u_name, channel = servers["main"]):
+   # try:
         print("Trying to send Message \n")
         data = {"content" : msg, "username" : u_name}
-        r = requests.post(discord_webhook, data= json.dumps(data), headers = {"content-Type" : "application/json"} )
+        r = requests.post(channel, data= json.dumps(data), headers = {"content-Type" : "application/json"} )
         print("Message successfully sent to Discord\n")
-    except Exception as e: 
-        print("Failed to Send message to Discord\n")
-        abort(404)
+        status = True
+        store_to_db(msg, u_name, status)
 
 
-@app.route('/radarr', methods  = ["Post"])
+
+@app.route('/rrfamily', methods  = ["Post"])
 def radarr():
     if request.method == 'POST':
         #The incoming data will be available on the variable request.json
@@ -56,7 +56,7 @@ def radarr():
         print()
         msg_dat = request.json['text']
         username = request.json['username']
-        send_to_discord(msg=msg_dat , u_name=username)
+        send_to_discord(msg=msg_dat , u_name=username, channel=servers["dev_channel"])
         return 'Success', 200
     else:
         abort(400)
@@ -74,9 +74,6 @@ def truenas():
 
 
 
+app.run(host="0.0.0.0", port= 5000)
 
 
-#pp.run(host="0.0.0.0", port= 5000)
-
-
-store_to_db("This is a test msg", False)
