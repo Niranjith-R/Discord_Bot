@@ -17,9 +17,10 @@ app = Flask(__name__)
 servers = {"main" : "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp", "dev_channel" : "https://discordapp.com/api/webhooks/1380238568231796857/kGLi-X7jwu7ScSKXNMxry2M8LR3zk0qP3y0HhEtphUY2cJdorxwL1MBffGyBoaBwDnia"}
 
 def create_db():
+    #Need to add Column date and Time
     try:
         cursor.execute("""CREATE TABLE IF NOT EXISTS SERVER_LOG (
-                    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, message VARCHAR(500), application_name VARCHAR(25), is_uploaded BOOLEAN);""")
+                    id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, message VARCHAR(500), application_name VARCHAR(25), is_uploaded BOOLEAN, "date" DATE, "time" TIME);""")
         print("Database created successfully")
         conn.commit()
     except Exception as e :
@@ -27,12 +28,13 @@ def create_db():
 
 
 def store_to_db(msg, u_name, status):
-    cursor.execute("""INSERT INTO SERVER_LOG (message,application_name, is_uploaded) VALUES(
-                   %s, %s, %s);
-    """, (msg, u_name,status))
-    conn.commit()
-    print("Successfully stored in Database\n")
-
+    try:
+        cursor.execute("""INSERT INTO SERVER_LOG (message,application_name, is_uploaded) VALUES(%s, %s, %s);""", (msg, u_name,status))
+        conn.commit()
+        print("Successfully stored in Database\n")
+    except Exception as e :
+        print("Exception occured while storing to Database")
+        print("Error : ", e)
 
 def send_to_discord(msg, u_name, channel = servers["main"]):
    # try:
@@ -51,7 +53,7 @@ def radarr():
         #The incoming data will be available on the variable request.json
         #Keep in mind that this 'request.json' is a part of Flask Module
         #While 'requests' module is imported to send the data to our discord webhook
-        print("Radarr Msg \n")
+        print("rr_family Msg \n")
         print(request.json)
         print()
         msg_dat = request.json['text']
@@ -70,8 +72,6 @@ def truenas():
         print()
         send_to_discord(msg= request.json["text"], u_name="Truenas")
         return 'Success', 200
-
-
 
 
 app.run(host="0.0.0.0", port= 5000)
