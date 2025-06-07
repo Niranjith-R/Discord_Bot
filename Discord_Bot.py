@@ -3,6 +3,7 @@ import requests
 import json
 from urllib3.exceptions import NameResolutionError
 import psycopg
+from time import localtime
 
 #SQL Config
 
@@ -16,6 +17,9 @@ app = Flask(__name__)
 
 servers = {"main" : "https://discordapp.com/api/webhooks/1373213736872968252/-KMxVSnrF0dTqvBdVbNytble-5QZ-E4-LMD2OEZjOJ5AtTEIiaeePou8sPZl6hHFKNSp", "dev_channel" : "https://discordapp.com/api/webhooks/1380238568231796857/kGLi-X7jwu7ScSKXNMxry2M8LR3zk0qP3y0HhEtphUY2cJdorxwL1MBffGyBoaBwDnia"}
 
+
+
+#Internal functions
 def create_db():
     #Need to add Column date and Time
     try:
@@ -28,13 +32,18 @@ def create_db():
 
 
 def store_to_db(msg, u_name, status):
+    time_placehold = localtime()
+    time = str(time_placehold.tm_hour) + ':' + str(time_placehold.tm_min) + ":" + str(time_placehold.tm_sec)
+    date =  str(time_placehold.tm_year) + "/" + str(time_placehold.tm_mon) + "/" + str(time_placehold.tm_mday)
     try:
-        cursor.execute("""INSERT INTO SERVER_LOG (message,application_name, is_uploaded) VALUES(%s, %s, %s);""", (msg, u_name,status))
+        cursor.execute("""INSERT INTO SERVER_LOG (message,application_name, is_uploaded, date, time) VALUES(%s, %s, %s, %s, %s);""", (msg, u_name,status, date, time))
         conn.commit()
         print("Successfully stored in Database\n")
     except Exception as e :
-        print("Exception occured while storing to Database")
+        print("Exception occured while storing to Database\n")
         print("Error : ", e)
+
+
 
 def send_to_discord(msg, u_name, channel = servers["main"]):
    # try:
@@ -47,6 +56,10 @@ def send_to_discord(msg, u_name, channel = servers["main"]):
 
 
 
+
+
+
+#Endpoints and their functions
 @app.route('/rrfamily', methods  = ["Post"])
 def radarr():
     if request.method == 'POST':
@@ -74,6 +87,6 @@ def truenas():
         return 'Success', 200
 
 
-app.run(host="0.0.0.0", port= 5000)
+# app.run(host="0.0.0.0", port= 5000)
 
-
+send_to_discord("Da Test Message", "Sugunan", servers["dev_channel"])
